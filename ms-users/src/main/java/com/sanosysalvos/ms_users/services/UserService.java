@@ -39,13 +39,9 @@ public class UserService {
     public UserResponseDTO syncUser(UserRequestDTO userReq) {
         return userRepository.findByFirebaseUid(userReq.getFirebaseUid())
                 .map(existingUser -> {
-                    // Actualizamos la entidad existente con los datos que vienen del DTO
-                    userMapper.updateEntityFromDto(userReq, existingUser);
-                    User updatedUser = userRepository.save(existingUser);
-                    return userMapper.toResponseDTO(updatedUser);
+                    return userMapper.toResponseDTO(existingUser);
                 })
                 .orElseGet(() -> {
-                    // Mapeamos el DTO a una nueva Entidad y guardamos
                     User newUser = userMapper.toEntity(userReq);
                     User savedUser = userRepository.save(newUser);
                     return userMapper.toResponseDTO(savedUser);

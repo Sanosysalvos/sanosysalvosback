@@ -6,6 +6,7 @@ import lombok.Data;
 public class UserResponseDTO {
     private String firebaseUid;
     private String nombre;
+    private String rut;
     private String email;
     private String celular;
     private String direccionResidencia;
