@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  sanos-db:
+    image: postgres:15
+    container_name: sanos-db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  ms-users:
+    build: ./ms-users
+    container_name: ms-users
+    ports:
+      - "${PORT_USERS}:${PORT_USERS}"
+    depends_on:
+      - sanos-db
+    environment:
+      - SERVER_PORT=${PORT_USERS}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+
+  ms-pets:
+    build: ./ms-pets
+    container_name: ms-pets
+    ports:
+      - "${PORT_PETS}:${PORT_PETS}"
+    depends_on:
+      - sanos-db
+    environment:
+      - SERVER_PORT=${PORT_PETS}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+
+      # ESTA PARTE ES LA QUE TE FALTABA:
+volumes:
+  pgdata:
