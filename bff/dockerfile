@@ -1,22 +1,20 @@
-# Etapa 1: Construcción (Usamos JDK 21)
+# Etapa 1: Construcción
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
-
-# Copiamos el pom y las librerías primero para que sea más rápido
 COPY pom.xml .
 RUN mvn dependency:go-offline
-
-# Copiamos el código y compilamos
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Etapa 2: Ejecución (Usamos JRE 21)
+# Etapa 2: Ejecución
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
 # Copiamos el jar generado
 COPY --from=build /app/target/*.jar app.jar
 
+# Puerto interno fijo (Spring Boot suele usar 8080 por defecto)
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Usamos el formato para que Spring reconozca el puerto que le mandas desde el .env
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${SERVER_PORT}"]
