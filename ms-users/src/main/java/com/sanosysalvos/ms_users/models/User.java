@@ -17,6 +17,8 @@ public class User {
     private String firebaseUid; // Crucial para tu login
 
     private String nombre;
+
+    @Column(name = "rut")
     private String rut;
     private String email;
     private String celular;
