@@ -15,7 +15,7 @@ public class Pet {
     @Column(columnDefinition = "UUID", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "user_uid", nullable = false)
+   @Column(name = "user_id") // Forzamos a que apunte a la columna real de la DB
     private String userUid;
 
     @Column(nullable = false)

@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # --- ms-users apunta ahora a AWS ---
   ms-users:
     build: ./ms-users
     container_name: ms-users
@@ -12,8 +11,13 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://${AWS_DB_ENDPOINT}:5432/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: 350M # Evita que el micro colapse la RAM de la EC2
+    networks:
+      - sanos-network
 
-  # --- ms-pets apunta ahora a AWS ---
   ms-pets:
     build: ./ms-pets
     container_name: ms-pets
@@ -24,13 +28,32 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://${AWS_DB_ENDPOINT}:5432/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+    networks:
+      - sanos-network
 
   bff:
     build: ./bff
     container_name: bff
     ports:
       - "8080:8080"
+    depends_on:
+      - ms-users
+      - ms-pets
     environment:
       - SERVER_PORT=8080
       - USERS_SERVICE_URL=http://ms-users:${PORT_USERS}
       - PETS_SERVICE_URL=http://ms-pets:${PORT_PETS}
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+    networks:
+      - sanos-network
+
+networks:
+  sanos-network:
+    driver: bridge
