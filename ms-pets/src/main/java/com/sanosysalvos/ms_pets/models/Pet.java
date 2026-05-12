@@ -13,7 +13,7 @@ public class Pet {
     @Id
     @GeneratedValue
     @Column(columnDefinition = "UUID", updatable = false, nullable = false)
-    private UUID id;
+    private String id;
 
     @Column(name = "user_id")
     private UUID userUid;
