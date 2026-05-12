@@ -5,11 +5,12 @@ import com.sanosysalvos.ms_pets.repositories.PetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/pets")
-<<<<<<< Updated upstream
 @CrossOrigin(origins = "*")
 public class PetController {
 
@@ -17,26 +18,6 @@ public class PetController {
     private PetRepository petRepository;
 
     // Listar todas las mascotas
-=======
-@RequiredArgsConstructor
-@CrossOrigin(origins = "https://sanosysalvos-five.vercel.app")
-public class PetController {
-
-    private final PetService petService;
-
-
-    @PostMapping
-    public ResponseEntity<PetResponseDTO> crearReporte(@Valid @RequestBody PetRequestDTO dto) {
-        PetResponseDTO nuevaMascota = petService.crearReporte(dto);
-        return new ResponseEntity<>(nuevaMascota, HttpStatus.CREATED);
-    }
-    // En PetController.java (Microservicio ms-pets)
-        @GetMapping("/owner/{uid}")
-        public ResponseEntity<List<PetResponseDTO>> getByOwner(@PathVariable String uid) {
-    // Aquí llamas al método del service que ya vimos
-        return ResponseEntity.ok(petService.obtenerPorUsuario(uid));
-}
->>>>>>> Stashed changes
     @GetMapping
     public List<Pet> getAllPets() {
         return petRepository.findAll();

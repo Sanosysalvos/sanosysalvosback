@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   sanos-db:
     image: postgres:15
@@ -17,7 +19,6 @@ services:
     container_name: ms-users
     ports:
       - "${PORT_USERS}:${PORT_USERS}"
-<<<<<<< Updated upstream
     depends_on:
       - sanos-db
     environment:
@@ -25,17 +26,6 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://sanos-db:5432/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-=======
-    # Quitamos el depends_on de sanos-db
-    environment:
-      - SERVER_PORT=${PORT_USERS}
-      # Apuntamos a la variable DB_HOST que será el endpoint de RDS
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
-      - SPRING_DATASOURCE_USERNAME=${DB_USER}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-    networks:
-      - sanos-network
->>>>>>> Stashed changes
 
   ms-pets:
     build: ./ms-pets
@@ -46,17 +36,9 @@ services:
       - sanos-db
     environment:
       - SERVER_PORT=${PORT_PETS}
-<<<<<<< Updated upstream
       - SPRING_DATASOURCE_URL=jdbc:postgresql://sanos-db:5432/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-=======
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
-      - SPRING_DATASOURCE_USERNAME=${DB_USER}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-    networks:
-      - sanos-network
->>>>>>> Stashed changes
 
   # --- EL NUEVO SERVICIO BFF ---
   bff:
@@ -72,17 +54,6 @@ services:
       # Usamos el nombre del contenedor y el puerto interno
       - USERS_SERVICE_URL=http://ms-users:${PORT_USERS}
       - PETS_SERVICE_URL=http://ms-pets:${PORT_PETS}
-<<<<<<< Updated upstream
 
 volumes:
   pgdata:
-=======
-    networks:
-      - sanos-network
-
-networks:
-  sanos-network:
-    driver: bridge
-
-# Borramos la sección de volumes: pgdata ya que RDS maneja su propio almacenamiento
->>>>>>> Stashed changes

@@ -9,11 +9,4 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByFirebaseUid(String firebaseUid);
-<<<<<<< Updated upstream
-=======
-    Boolean existsByEmail(String email);
-    Boolean existsByRut(String rut);
-    Optional<User> findByEmail(String email);
-    
->>>>>>> Stashed changes
 }

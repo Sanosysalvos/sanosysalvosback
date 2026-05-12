@@ -8,12 +8,6 @@ import java.util.List;
 
 @Repository
 public interface PetRepository extends JpaRepository<Pet, UUID> {
-<<<<<<< Updated upstream
     // Busca todas las mascotas asociadas a un usuario específico
     List<Pet> findByUserId(UUID userId);
 }
-=======
-
-    List<Pet> findByUserUid(String userUid);
-}
->>>>>>> Stashed changes
