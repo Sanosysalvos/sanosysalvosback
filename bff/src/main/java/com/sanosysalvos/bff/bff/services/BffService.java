@@ -24,28 +24,27 @@ public class BffService {
     private String msPetsUrl;
 
     // --- 1. PERFIL (MEJORADO: Directo por UID para no traer miles de mascotas) ---
-    public PerfilResponse getPerfil(String firebaseUid) {
-        // Obtenemos el usuario de ms-users
-        Map<String, Object> usuario = restTemplate.getForObject(
-                msUsersUrl + "/api/users/firebase/" + firebaseUid,
-                Map.class
-        );
+   public PerfilResponse getPerfil(String firebaseUid) {
+    Map<String, Object> usuario = restTemplate.getForObject(
+            msUsersUrl + "/api/users/firebase/" + firebaseUid, Map.class);
 
-        // Pedimos directamente a ms-pets las mascotas de este dueño
-        // (Asegúrate de tener el endpoint GET /api/pets/owner/{uid} en ms-pets)
+    PerfilResponse perfil = new PerfilResponse();
+    perfil.setUsuario(usuario);
+
+    try {
         List<Map<String, Object>> mascotasDelUsuario = restTemplate.exchange(
                 msPetsUrl + "/api/pets/owner/" + firebaseUid,
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<Map<String, Object>>>() {}
         ).getBody();
-
-        PerfilResponse perfil = new PerfilResponse();
-        perfil.setUsuario(usuario);
         perfil.setMascotas(mascotasDelUsuario != null ? mascotasDelUsuario : List.of());
-        return perfil;
+    } catch (Exception e) {
+        System.err.println("Error al traer mascotas: " + e.getMessage());
+        perfil.setMascotas(List.of()); // Si falla ms-pets, devolvemos lista vacía pero NO rompemos el perfil
     }
-
+    return perfil;
+}
     // --- 2. EXPLORAR: Trae TODO el catálogo de ms-pets ---
     public List<Map<String, Object>> getMascotasParaExplorar() {
         return restTemplate.exchange(
