@@ -38,10 +38,10 @@ public class Pet {
     @Column(nullable = false)
     private PetStatus estado;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "numeric")
     private Double latitud;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "numeric")
     private Double longitud;
 
     @Column(columnDefinition = "TEXT")
