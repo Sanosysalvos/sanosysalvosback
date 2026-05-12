@@ -103,4 +103,9 @@ public ResponseEntity<Map<String, Object>> getDatosDueño(@PathVariable String f
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 }
+// 1. REGISTRO: Recibe de Vercel y manda a ms-users
+    @PostMapping("/users")
+    public ResponseEntity<Map> registrar(@RequestBody Map<String, Object> datos) {
+        return bffService.registrarUsuario(datos);
+    }
 }

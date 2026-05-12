@@ -129,6 +129,7 @@ public Map<String, Object> getUsuarioPorId(String uid) {
         // Devolvemos null para que el Controller pueda manejar el 404
         return null; 
     }
+
 }
 
 }
