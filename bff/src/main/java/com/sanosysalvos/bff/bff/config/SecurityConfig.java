@@ -1,5 +1,4 @@
-package com.sanosysalvos.ms_users.config;
-
+package com.sanosysalvos.bff.bff.config;
 import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,26 +17,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Aquí llamamos al método de abajo
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // Abierto para probar
+                .anyRequest().permitAll() // El BFF debe dejar pasar todo hacia los microservicios
             );
-        
         return http.build();
     }
 
-    // ESTE ES EL MÉTODO QUE TE FALTABA O ESTABA MAL UBICADO
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Agregamos tus orígenes
         configuration.setAllowedOrigins(Arrays.asList(
-            "https://sanosysalvos-five.vercel.app", 
+            "https://sanosysalvos-five.vercel.app",
             "http://localhost:3000"
         ));
-        
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
