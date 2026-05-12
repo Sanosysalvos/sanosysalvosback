@@ -43,10 +43,13 @@ public class PetService {
 
     @Transactional(readOnly = true)
     public List<PetResponseDTO> obtenerPorUsuario(String userUid) {
-        return petRepository.findByUserUid(userUid).stream()
-                .map(petMapper::toResponseDTO)
-                .collect(Collectors.toList());
-    }
+    // Convertimos el String que viene del controlador a un UUID
+    UUID uuid = UUID.fromString(userUid); 
+    
+    return petRepository.findByUserUid(uuid).stream() // <-- Ahora pasamos el objeto UUID
+            .map(petMapper::toResponseDTO)
+            .collect(Collectors.toList());
+}
 
     @Transactional
     public PetResponseDTO actualizarMascota(UUID id, PetRequestDTO dto) {
