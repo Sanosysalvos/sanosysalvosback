@@ -15,8 +15,8 @@ public class Pet {
     @Column(columnDefinition = "UUID", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "user_uid", nullable = false)
-    private String userUid;
+    @Column(name = "user_id")
+    private UUID userUid;
 
     @Column(nullable = false)
     private String nombre;
