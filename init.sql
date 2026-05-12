@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS pets (
     nombre VARCHAR(50) NOT NULL,
     especie VARCHAR(30) NOT NULL, -- Agregado para búsquedas rápidas
     color VARCHAR(30) NOT NULL,
-    edad VARCHAR(20),
+    edad INTEGER(20),
     descripcion TEXT,
     fecha_perdida DATE, -- Coincide con LocalDate en Java
     estado pet_status DEFAULT 'PERDIDO',

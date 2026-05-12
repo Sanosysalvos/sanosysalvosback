@@ -1,59 +1,49 @@
-version: '3.8'
-
 services:
-  sanos-db:
-    image: postgres:15
-    container_name: sanos-db
-    environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "${DB_PORT}:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-
   ms-users:
     build: ./ms-users
     container_name: ms-users
     ports:
       - "${PORT_USERS}:${PORT_USERS}"
-    depends_on:
-      - sanos-db
+    # Quitamos el depends_on de sanos-db
     environment:
       - SERVER_PORT=${PORT_USERS}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://sanos-db:5432/${DB_NAME}
+      # Apuntamos a la variable DB_HOST que será el endpoint de RDS
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+    networks:
+      - sanos-network
 
   ms-pets:
     build: ./ms-pets
     container_name: ms-pets
     ports:
       - "${PORT_PETS}:${PORT_PETS}"
-    depends_on:
-      - sanos-db
     environment:
       - SERVER_PORT=${PORT_PETS}
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://sanos-db:5432/${DB_NAME}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+    networks:
+      - sanos-network
 
-  # --- EL NUEVO SERVICIO BFF ---
   bff:
     build: ./bff
     container_name: bff
     ports:
-      - "8080:8080" # El puerto que usarás en Thunder Client
+      - "8080:8080"
     depends_on:
       - ms-users
       - ms-pets
     environment:
       - SERVER_PORT=8080
-      # Usamos el nombre del contenedor y el puerto interno
       - USERS_SERVICE_URL=http://ms-users:${PORT_USERS}
       - PETS_SERVICE_URL=http://ms-pets:${PORT_PETS}
+    networks:
+      - sanos-network
 
-volumes:
-  pgdata:
+networks:
+  sanos-network:
+    driver: bridge
+
+# Borramos la sección de volumes: pgdata ya que RDS maneja su propio almacenamiento

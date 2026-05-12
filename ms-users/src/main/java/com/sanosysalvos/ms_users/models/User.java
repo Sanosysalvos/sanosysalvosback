@@ -4,6 +4,7 @@ import jakarta.persistence.*; // Esto soluciona @Entity, @Table, @Id, @Column
 import lombok.Data;            // Esto soluciona @Data
 import java.util.UUID;          // Esto soluciona el tipo UUID
 import java.time.LocalDateTime; // Esto soluciona LocalDateTime
+import com.fasterxml.jackson.annotation.JsonProperty; // Importante
 
 @Entity
 @Table(name = "users")
@@ -11,19 +12,27 @@ import java.time.LocalDateTime; // Esto soluciona LocalDateTime
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id; // Coincide con UUID PRIMARY KEY
+    private UUID id;
 
+    // Esta anotación le dice a Java: "Si recibes 'firebase_uid' en el JSON, guárdalo aquí"
+    @JsonProperty("firebase_uid") 
     @Column(name = "firebase_uid", unique = true, nullable = false)
-    private String firebaseUid; // Crucial para tu login
+    private String firebaseUid;
 
     private String nombre;
+
+    @Column(name = "rut")
     private String rut;
+
     private String email;
+
     private String celular;
 
-    @Column(name = "direccion_residencia")
+    @JsonProperty("direccionResidencia") // <--- Así debe coincidir con React
+    @Column(name = "direccion_residencia") // <--- Así coincide con la DB
     private String direccionResidencia;
 
+    @JsonProperty("is_admin")
     @Column(name = "is_admin")
     private Boolean isAdmin = false;
 
