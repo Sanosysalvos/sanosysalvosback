@@ -13,8 +13,13 @@ public class Pet {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+<<<<<<< Updated upstream
     @Column(name = "user_id")
     private UUID userId; 
+=======
+    @Column(name = "user_uid", nullable = false)
+    private String userUid;
+>>>>>>> Stashed changes
 
     private String nombre;
     private String especie; // <--- Mantenla, es necesaria
@@ -35,4 +40,7 @@ public class Pet {
 
     @Column(columnDefinition = "TEXT")
     private String foto;
+    
+    @Column(columnDefinition = "TEXT")
+    private String direccionFormateada;
 }
