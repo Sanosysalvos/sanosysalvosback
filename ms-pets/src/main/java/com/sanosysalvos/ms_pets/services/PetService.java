@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class PetService {
@@ -35,7 +34,7 @@ public class PetService {
     }
 
     @Transactional(readOnly = true)
-    public PetResponseDTO obtenerPorId(UUID id) {
+    public PetResponseDTO obtenerPorId(UUID id) { // El ID de la mascota sigue siendo UUID
         Pet pet = petRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Mascota no encontrada con el ID: " + id));
         return petMapper.toResponseDTO(pet);
@@ -43,13 +42,11 @@ public class PetService {
 
     @Transactional(readOnly = true)
     public List<PetResponseDTO> obtenerPorUsuario(String userUid) {
-    // Convertimos el String que viene del controlador a un UUID
-    UUID uuid = UUID.fromString(userUid); 
-    
-    return petRepository.findByUserUid(uuid).stream() // <-- Ahora pasamos el objeto UUID
-            .map(petMapper::toResponseDTO)
-            .collect(Collectors.toList());
-}
+        // ELIMINADA la conversión a UUID. Usamos el String de Firebase directamente.
+        return petRepository.findByUserUid(userUid).stream() 
+                .map(petMapper::toResponseDTO)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public PetResponseDTO actualizarMascota(UUID id, PetRequestDTO dto) {
@@ -68,5 +65,4 @@ public class PetService {
         }
         petRepository.deleteById(id);
     }
-    
 }
