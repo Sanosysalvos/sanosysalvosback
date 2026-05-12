@@ -13,10 +13,10 @@ public class Pet {
     @Id
     @GeneratedValue
     @Column(columnDefinition = "UUID", updatable = false, nullable = false)
-    private String id;
+    private UUID id;
 
     @Column(name = "user_id")
-    private UUID userUid;
+    private String userUid;
 
     @Column(nullable = false)
     private String nombre;
