@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface PetRepository extends JpaRepository<Pet, UUID> {
 
-    List<Pet> findByUserUid(UUID userUid);
+    List<Pet> findByUserUid(String userUid);
 }
