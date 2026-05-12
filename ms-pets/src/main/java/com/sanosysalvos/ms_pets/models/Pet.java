@@ -24,6 +24,7 @@ public class Pet {
     @Column(nullable = false)
     private String especie;
 
+    @Column(name = "color", nullable = true) // Cambiar a true
     private String color;
 
     private Integer edad;
