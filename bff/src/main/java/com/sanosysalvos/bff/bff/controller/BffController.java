@@ -104,8 +104,9 @@ public ResponseEntity<Map<String, Object>> getDatosDueño(@PathVariable String f
     }
 }
 // 1. REGISTRO: Recibe de Vercel y manda a ms-users
-    @PostMapping("/users")
-    public ResponseEntity<Map> registrar(@RequestBody Map<String, Object> datos) {
-        return bffService.registrarUsuario(datos);
-    }
+@PostMapping("/users")
+public ResponseEntity<Map> registrar(@RequestBody Map<String, Object> datos) {
+    // El microservicio devuelve el usuario creado, el BFF debe pasarlo de vuelta al frontend
+    return bffService.registrarUsuario(datos);
+}
 }
