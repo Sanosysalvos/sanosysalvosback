@@ -2,6 +2,7 @@ services:
   ms-users:
     build: ./ms-users
     container_name: ms-users
+    restart: unless-stopped # <--- Agregado: Reinicio automático
     ports:
       - "${PORT_USERS}:${PORT_USERS}"
     # Quitamos el depends_on de sanos-db
@@ -17,6 +18,7 @@ services:
   ms-pets:
     build: ./ms-pets
     container_name: ms-pets
+    restart: unless-stopped # <--- Agregado: Reinicio automático
     ports:
       - "${PORT_PETS}:${PORT_PETS}"
     environment:
@@ -30,6 +32,7 @@ services:
   bff:
     build: ./bff
     container_name: bff
+    restart: unless-stopped # <--- Agregado: Reinicio automático
     ports:
       - "80:80"
     depends_on:
