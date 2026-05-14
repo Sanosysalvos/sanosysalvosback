@@ -27,16 +27,16 @@ public class SecurityConfig {
             
             // 3. Reglas de autorización (Quién entra y quién no)
             .authorizeHttpRequests(auth -> auth
-                // Endpoints PÚBLICOS: Permitimos revisar si el email o rut existen sin estar logueado
-                .requestMatchers(HttpMethod.GET, "/api/users/check-email", "/api/users/check-rut").permitAll()
-                
-                // Endpoints PRIVADOS: Cualquier otra acción en usuarios requiere token válido
-                .requestMatchers("/api/users/**").authenticated()
-                
-                // Cerrrojo total: Cualquier otra petición que no coincida arriba, también se bloquea
-                .anyRequest().authenticated()
-            )
-            
+    // Endpoints PÚBLICOS
+            .requestMatchers(HttpMethod.GET, "/api/users/check-email", "/api/users/check-rut").permitAll()
+    
+    // Endpoints PRIVADOS (Agregamos la ruta de perfil aquí)
+            .requestMatchers("/api/users/**").authenticated()
+            .requestMatchers("/api/perfil/**").authenticated() // <--- ¡Agregado!
+    
+    // Cerrojo total
+            .anyRequest().authenticated()
+)
             // 4. El guardián: Valida automáticamente los JWT (Tokens) de Firebase
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
         
