@@ -1,6 +1,6 @@
 services:
   ms-users:
-    build: ./ms-users
+    image: leaduran/ms-users:latest
     container_name: ms-users
     restart: unless-stopped # <--- Agregado: Reinicio automático
     ports:
