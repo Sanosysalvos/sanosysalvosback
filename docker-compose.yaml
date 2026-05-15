@@ -1,9 +1,13 @@
 services:
-  # 1. Usuarios (Ya lo tenías así)
   ms-users:
     image: leaduran/ms-users:latest
     container_name: ms-users
     restart: unless-stopped
+    # Límites de recursos para evitar congelamiento
+    deploy:
+      resources:
+        limits:
+          memory: 200M
     ports:
       - "8081:8081"
     environment:
@@ -11,14 +15,19 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      # Tip para Java: Forzar a que use menos memoria
+      - JAVA_OPTS=-Xmx128m -Xms64m
     networks:
       - sanos-network
 
-  # 2. Mascotas (Cambiado a image)
   ms-pets:
     image: leaduran/ms-pets:latest
     container_name: ms-pets
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 200M
     ports:
       - "8082:8082"
     environment:
@@ -26,28 +35,36 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JAVA_OPTS=-Xmx128m -Xms64m
     networks:
       - sanos-network
 
-  # 3. Notificaciones (Cambiado a image)
   ms-notification:
     image: leaduran/ms-notification:latest
     container_name: ms-notification
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 180M
     ports:
       - "8083:8083"
     environment:
       - SERVER_PORT=8083
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
       - SENDGRID_FROM_EMAIL=${SENDGRID_FROM_EMAIL}
+      - JAVA_OPTS=-Xmx100m -Xms50m
     networks:
       - sanos-network
 
-  # 4. BFF (Cambiado a image)
   bff:
     image: leaduran/bff:latest
     container_name: bff
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 180M
     ports:
       - "80:80"
     depends_on:
@@ -59,6 +76,7 @@ services:
       - USERS_SERVICE_URL=http://ms-users:8081
       - PETS_SERVICE_URL=http://ms-pets:8082
       - NOTIFICATION_SERVICE_URL=http://ms-notification:8083
+      - JAVA_OPTS=-Xmx100m -Xms50m
     networks:
       - sanos-network
 
