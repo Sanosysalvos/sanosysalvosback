@@ -2,6 +2,7 @@ services:
   ms-users:
     image: leaduran/ms-users:latest
     container_name: ms-users
+    restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -20,6 +21,7 @@ services:
   ms-pets:
     image: leaduran/ms-pets:latest
     container_name: ms-pets
+    restart: unless-stopped
     deploy:
       resources:
         limits:
@@ -38,6 +40,7 @@ services:
   bff:
     image: leaduran/bff:latest
     container_name: bff
+    restart: unless-stopped
     deploy:
       resources:
         limits:
