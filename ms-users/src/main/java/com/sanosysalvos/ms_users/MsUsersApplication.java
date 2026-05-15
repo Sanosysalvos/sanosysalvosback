@@ -1,13 +1,13 @@
-package com.sanosysalvos.ms_notification;
+package com.sanosysalvos.ms_users;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MsNotificationApplication {
+public class MsUsersApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MsNotificationApplication.class, args);
+		SpringApplication.run(MsUsersApplication.class, args);
 	}
 
 }

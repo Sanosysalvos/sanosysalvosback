@@ -1,10 +1,10 @@
-package com.sanosysalvos.ms_notification;
+package com.sanosysalvos.ms_users;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MsNotificationApplicationTests {
+class MsUsersApplicationTests {
 
 	@Test
 	void contextLoads() {
