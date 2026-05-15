@@ -12,9 +12,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "https://sanosysalvos-five.vercel.app",
-    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS}
-) 
+@CrossOrigin(
+    origins = ("http://localhost:3000"),
+    methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+    allowedHeaders = "*"
+)
 public class BffController {
 
     @Autowired
@@ -93,5 +95,20 @@ public class BffController {
     public ResponseEntity<Void> eliminarMascota(@PathVariable String id) {
         bffService.eliminarMascota(id); 
         return ResponseEntity.noContent().build();
+    }
+
+    // --- NOTIFICACIONES ---
+
+    @PostMapping("/notificar-avistamiento")
+    public ResponseEntity<Map<String, String>> enviarNotificacion(@RequestBody Map<String, String> payload) {
+        try {
+            // El payload debe traer: "petId", "nombreMascota" y "mensaje"
+            bffService.enviarNotificacionAvistamiento(payload);
+            return ResponseEntity.ok(Map.of("message", "Notificación enviada con éxito"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "No se pudo enviar la notificación"));
+        }
     }
 }

@@ -1,52 +1,68 @@
 services:
+  # 1. Microservicio de Usuarios (Usando tu imagen de Docker Hub)
   ms-users:
     image: leaduran/ms-users:latest
     container_name: ms-users
-    restart: unless-stopped # <--- Agregado: Reinicio automático
+    restart: unless-stopped
     ports:
-      - "${PORT_USERS}:${PORT_USERS}"
-    # Quitamos el depends_on de sanos-db
+      - "8081:8081"
     environment:
-      - SERVER_PORT=${PORT_USERS}
-      # Apuntamos a la variable DB_HOST que será el endpoint de RDS
+      - SERVER_PORT=8081
       - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
     networks:
       - sanos-network
 
+  # 2. Microservicio de Mascotas
   ms-pets:
     build: ./ms-pets
     container_name: ms-pets
-    restart: unless-stopped # <--- Agregado: Reinicio automático
+    restart: unless-stopped
     ports:
-      - "${PORT_PETS}:${PORT_PETS}"
+      - "8082:8082"
     environment:
-      - SERVER_PORT=${PORT_PETS}
+      - SERVER_PORT=8082
       - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:5432/${DB_NAME}
       - SPRING_DATASOURCE_USERNAME=${DB_USER}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
     networks:
       - sanos-network
 
+  # 3. Microservicio de Notificaciones (¡NUEVO!)
+  ms-notification:
+    build: ./ms-notification
+    container_name: ms-notification
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVER_PORT=8083
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - SENDGRID_FROM_EMAIL=${SENDGRID_FROM_EMAIL}
+    networks:
+      - sanos-network
+
+  # 4. BFF (El orquestador)
   bff:
     build: ./bff
     container_name: bff
-    restart: unless-stopped # <--- Agregado: Reinicio automático
+    restart: unless-stopped
     ports:
       - "80:80"
     depends_on:
       - ms-users
       - ms-pets
+      - ms-notification
     environment:
       - SERVER_PORT=80
-      - USERS_SERVICE_URL=http://ms-users:${PORT_USERS}
-      - PETS_SERVICE_URL=http://ms-pets:${PORT_PETS}
+      # URLs de servicios internos (Usamos los nombres del container)
+      - USERS_SERVICE_URL=http://ms-users:8081
+      - PETS_SERVICE_URL=http://ms-pets:8082
+      - NOTIFICATION_SERVICE_URL=http://ms-notification:8083
     networks:
       - sanos-network
 
 networks:
   sanos-network:
     driver: bridge
-
-# Borramos la sección de volumes: pgdata ya que RDS maneja su propio almacenamiento

@@ -8,6 +8,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,29 +24,34 @@ public class BffService {
     @Value("${ms.pets.url}")
     private String msPetsUrl;
 
-    // --- 1. PERFIL (MEJORADO: Directo por UID para no traer miles de mascotas) ---
-   public PerfilResponse getPerfil(String firebaseUid) {
-    Map<String, Object> usuario = restTemplate.getForObject(
-            msUsersUrl + "/api/users/firebase/" + firebaseUid, Map.class);
+    // NUEVA VARIABLE: Inyectada desde application.properties
+    @Value("${ms.notification.url}")
+    private String msNotificationUrl;
 
-    PerfilResponse perfil = new PerfilResponse();
-    perfil.setUsuario(usuario);
+    // --- 1. PERFIL ---
+    public PerfilResponse getPerfil(String firebaseUid) {
+        Map<String, Object> usuario = restTemplate.getForObject(
+                msUsersUrl + "/api/users/firebase/" + firebaseUid, Map.class);
 
-    try {
-        List<Map<String, Object>> mascotasDelUsuario = restTemplate.exchange(
-                msPetsUrl + "/api/pets/owner/" + firebaseUid,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Map<String, Object>>>() {}
-        ).getBody();
-        perfil.setMascotas(mascotasDelUsuario != null ? mascotasDelUsuario : List.of());
-    } catch (Exception e) {
-        System.err.println("Error al traer mascotas: " + e.getMessage());
-        perfil.setMascotas(List.of()); // Si falla ms-pets, devolvemos lista vacía pero NO rompemos el perfil
+        PerfilResponse perfil = new PerfilResponse();
+        perfil.setUsuario(usuario);
+
+        try {
+            List<Map<String, Object>> mascotasDelUsuario = restTemplate.exchange(
+                    msPetsUrl + "/api/pets/owner/" + firebaseUid,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+            ).getBody();
+            perfil.setMascotas(mascotasDelUsuario != null ? mascotasDelUsuario : List.of());
+        } catch (Exception e) {
+            System.err.println("Error al traer mascotas: " + e.getMessage());
+            perfil.setMascotas(List.of());
+        }
+        return perfil;
     }
-    return perfil;
-}
-    // --- 2. EXPLORAR: Trae TODO el catálogo de ms-pets ---
+
+    // --- 2. EXPLORAR ---
     public List<Map<String, Object>> getMascotasParaExplorar() {
         return restTemplate.exchange(
                 msPetsUrl + "/api/pets",
@@ -55,12 +61,12 @@ public class BffService {
         ).getBody();
     }
 
-    // --- 3. DETALLE: Busca una mascota específica por ID ---
+    // --- 3. DETALLE ---
     public Map<String, Object> getMascotaPorId(String id) {
         return restTemplate.getForObject(msPetsUrl + "/api/pets/" + id, Map.class);
     }
 
-    // --- 4. REPORTAR: Proxy para guardar en ms-pets ---
+    // --- 4. REPORTAR ---
     public ResponseEntity<Map> reportarMascota(Map<String, Object> datosMascota) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -68,7 +74,7 @@ public class BffService {
         return restTemplate.postForEntity(msPetsUrl + "/api/pets", request, Map.class);
     }
 
-    // --- 5. REGISTRO: Proxy para crear usuario en ms-users ---
+    // --- 5. REGISTRO ---
     public ResponseEntity<Map> registrarUsuario(Map<String, Object> datosUsuario) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -76,36 +82,24 @@ public class BffService {
         return restTemplate.postForEntity(msUsersUrl + "/api/users", request, Map.class);
     }
 
-    // --- 6. ACTUALIZAR: Proxy para modificar en ms-users ---
-  // BffService.java
-public ResponseEntity<Map> actualizarUsuario(String userId, Map<String, Object> datosUsuario) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    HttpEntity<Map<String, Object>> request = new HttpEntity<>(datosUsuario, headers);
+    // --- 6. ACTUALIZAR USUARIO ---
+    public ResponseEntity<Map> actualizarUsuario(String userId, Map<String, Object> datosUsuario) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(datosUsuario, headers);
+        String url = msUsersUrl + "/api/users/firebase/" + userId; 
+        return restTemplate.exchange(url, HttpMethod.PUT, request, Map.class);
+    }
 
-    // CORRECCIÓN AQUÍ: Agregamos "/firebase/" a la ruta
-    String url = msUsersUrl + "/api/users/firebase/" + userId; 
-
-    return restTemplate.exchange(
-            url,
-            HttpMethod.PUT,
-            request,
-            Map.class
-    );
-}
     public void eliminarMascota(String id) {
-        // Esto envía un DELETE al microservicio de mascotas
-        // La URL final será algo como: http://localhost:8082/api/pets/123e4567-e89b...
         restTemplate.delete(msPetsUrl + "/api/pets/" + id);
     }
-    // --- 7. ACTUALIZAR MASCOTA: Proxy para modificar en ms-pets ---
+
+    // --- 7. ACTUALIZAR MASCOTA ---
     public Map<String, Object> actualizarMascota(String id, Map<String, Object> datosMascota) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(datosMascota, headers);
-        
-        // Usamos exchange porque restTemplate.put no devuelve el cuerpo de la respuesta
         return restTemplate.exchange(
                 msPetsUrl + "/api/pets/" + id,
                 HttpMethod.PUT,
@@ -113,22 +107,61 @@ public ResponseEntity<Map> actualizarUsuario(String userId, Map<String, Object> 
                 new ParameterizedTypeReference<Map<String, Object>>() {}
         ).getBody();
     }
-// --- 8. BUSCAR DUEÑO (Para Panel Admin): Usa el Firebase UID que viene de ms-pets ---
-public Map<String, Object> getUsuarioPorId(String uid) {
-    try {
-        // 1. Usamos la variable msUsersUrl que ya tienes inyectada
-        // 2. Apuntamos a /firebase/ porque el UID que recibimos es el de Firebase (zHAj2...)
-        String url = msUsersUrl + "/api/users/firebase/" + uid; 
-        
-        System.out.println("BFF consultando dueño en: " + url);
-        
-        return restTemplate.getForObject(url, Map.class);
-    } catch (Exception e) {
-        System.err.println("Error en BFF al obtener usuario por Firebase UID: " + e.getMessage());
-        // Devolvemos null para que el Controller pueda manejar el 404
-        return null; 
+
+    // --- 8. BUSCAR DUEÑO POR UID ---
+    public Map<String, Object> getUsuarioPorId(String uid) {
+        try {
+            String url = msUsersUrl + "/api/users/firebase/" + uid; 
+            return restTemplate.getForObject(url, Map.class);
+        } catch (Exception e) {
+            System.err.println("Error en BFF al obtener usuario: " + e.getMessage());
+            return null; 
+        }
     }
 
-}
+    // --- 9. NOTIFICACIÓN (CORREGIDO Y DINÁMICO) ---
+    public void enviarNotificacionAvistamiento(Map<String, String> payload) {
+        try {
+            String petId = payload.get("petId");
+            String mensajeUsuario = payload.get("mensaje");
 
+            // 1. Obtener la mascota (Usamos userUid que es el campo real del DTO)
+            Map<String, Object> mascota = getMascotaPorId(petId);
+            if (mascota == null) {
+                System.err.println("BFF: No se encontró la mascota ID: " + petId);
+                return;
+            }
+
+            String ownerUid = (String) mascota.get("userUid"); 
+            String nombreMascota = (String) mascota.get("nombre");
+
+            // 2. Obtener datos del dueño para el email
+            Map<String, Object> dueño = getUsuarioPorId(ownerUid);
+            if (dueño == null || dueño.get("email") == null) {
+                System.err.println("BFF: Dueño no encontrado o sin email para UID: " + ownerUid);
+                return; 
+            }
+
+            String emailDueño = dueño.get("email").toString();
+
+            // 3. Preparar JSON para ms-notification
+            Map<String, String> notificationRequest = new HashMap<>();
+            notificationRequest.put("email", emailDueño);
+            notificationRequest.put("mascota", nombreMascota);
+            notificationRequest.put("mensaje", mensajeUsuario);
+
+            // 4. URL DINÁMICA (Usa la variable msNotificationUrl)
+            String urlFinal = msNotificationUrl + "/api/notifications/send-test"; 
+            
+            System.out.println("BFF: Enviando notificación a " + urlFinal + " para: " + emailDueño);
+            
+            ResponseEntity<String> response = restTemplate.postForEntity(urlFinal, notificationRequest, String.class);
+            
+            System.out.println("BFF: Respuesta ms-notification: " + response.getStatusCode());
+
+        } catch (Exception e) {
+            System.err.println("BFF: Falló el flujo de notificación: " + e.getMessage());
+            throw e;
+        }
+    }
 }

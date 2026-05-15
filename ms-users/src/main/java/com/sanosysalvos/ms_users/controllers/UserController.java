@@ -14,7 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/users")
 // Mantenemos CrossOrigin, pero recuerda que SecurityConfig es el que manda ahora
-@CrossOrigin(origins = "https://sanosysalvos-five.vercel.app") 
+@CrossOrigin(origins = {"https://sanosysalvos-five.vercel.app","http://localhost:3000"}) 
 public class UserController {
 
     @Autowired

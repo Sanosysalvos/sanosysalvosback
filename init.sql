@@ -28,11 +28,12 @@ CREATE TABLE IF NOT EXISTS pets (
     user_id UUID REFERENCES users(id) ON DELETE CASCADE, -- Relación con el dueño
     nombre VARCHAR(50) NOT NULL,
     especie VARCHAR(30) NOT NULL, -- Agregado para búsquedas rápidas
-    color VARCHAR(30) NOT NULL,
-    edad INTEGER(20),
+    color VARCHAR(30),
+    edad INTEGER,
     descripcion TEXT,
     fecha_perdida DATE, -- Coincide con LocalDate en Java
     estado pet_status DEFAULT 'PERDIDO',
+    direccion_formateada TEXT,
     latitud DECIMAL(10, 8), -- Renombrado para coincidir con el código Java
     longitud DECIMAL(11, 8), -- Renombrado para coincidir con el código Java
     foto TEXT, -- Para almacenar el Base64 inicial
