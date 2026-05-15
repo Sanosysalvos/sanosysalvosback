@@ -120,7 +120,7 @@ public class BffService {
     }
 
     // --- 9. NOTIFICACIÓN (CORREGIDO Y DINÁMICO) ---
-    public void enviarNotificacionAvistamiento(Map<String, String> payload) {
+  public void enviarNotificacionAvistamiento(Map<String, String> payload) {
         try {
             String petId = payload.get("petId");
             String mensajeUsuario = payload.get("mensaje");
