@@ -2,19 +2,12 @@ package com.sanosysalvos.bff.bff;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
-@SpringBootApplication
+// Excluimos la configuración automática de seguridad básica
+@SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
 public class BffApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(BffApplication.class, args);
-	}
-
-	// es para llamar a ms-pets y ms-users
-	@Bean
-	public RestTemplate restTemplate() {
-		return new RestTemplate();
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(BffApplication.class, args);
+    }
 }
