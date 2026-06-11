@@ -1,5 +1,6 @@
 package com.sanosysalvos.ms_pets.dtos;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.sanosysalvos.ms_pets.models.PetStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,7 +11,8 @@ import java.time.LocalDate;
 @Data
 public class PetRequestDTO {
 
-    @NotBlank(message = "El UID del usuario es obligatorio para asociar la mascota.")
+    @NotNull(message = "El ID del usuario es obligatorio para asociar la mascota.")
+    @JsonAlias({"userUid", "user_id", "userId"})  // ← ACEPTA VARIOS NOMBRES
     private String userUid;
 
     @NotBlank(message = "El nombre de la mascota no puede estar vacío.")
@@ -40,5 +42,6 @@ public class PetRequestDTO {
     @NotNull(message = "La longitud es obligatoria para ubicar el reporte en el mapa.")
     private Double longitud;
 
-    private String foto; // URL opcional al principio, o por si se sube directo a Firebase Storage
+    private String direccionFormateada; 
+    private String foto; 
 }

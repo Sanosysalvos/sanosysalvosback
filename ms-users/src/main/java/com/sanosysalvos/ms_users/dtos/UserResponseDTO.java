@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class UserResponseDTO {
+    private java.util.UUID id;  // ← agregar esto
     private String firebaseUid;
     private String nombre;
     private String rut;

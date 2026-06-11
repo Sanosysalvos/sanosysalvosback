@@ -28,8 +28,12 @@ public class PetController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PetResponseDTO>> obtenerTodas() {
-        return ResponseEntity.ok(petService.obtenerTodas());
+    public ResponseEntity<List<PetResponseDTO>> obtenerTodas(
+    @RequestParam(value = "recientes", required = false, defaultValue = "false") boolean recientes
+    ) 
+    {
+    // Le pasamos el booleano al servicio para que decida qué traer
+    return ResponseEntity.ok(petService.obtenerTodas(recientes));
     }
 
     @GetMapping("/{id}")

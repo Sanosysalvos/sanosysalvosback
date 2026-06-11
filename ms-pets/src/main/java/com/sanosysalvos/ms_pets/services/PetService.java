@@ -1,11 +1,15 @@
 package com.sanosysalvos.ms_pets.services;
 
+import com.sanosysalvos.ms_pets.clients.UserClient;
 import com.sanosysalvos.ms_pets.dtos.PetRequestDTO;
 import com.sanosysalvos.ms_pets.dtos.PetResponseDTO;
 import com.sanosysalvos.ms_pets.mappers.PetMapper;
 import com.sanosysalvos.ms_pets.models.Pet;
 import com.sanosysalvos.ms_pets.repositories.PetRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,20 +23,42 @@ public class PetService {
 
     private final PetRepository petRepository;
     private final PetMapper petMapper;
+    private final UserClient userClient;
 
     @Transactional
     public PetResponseDTO crearReporte(PetRequestDTO dto) {
+        // Resolver el Firebase UID a UUID llamando a ms-users
+        UUID userUuid = userClient.getUuidByFirebaseUid(dto.getUserUid());
+        
+        // Crear la entidad Pet a partir del DTO
         Pet pet = petMapper.toEntity(dto);
+        
+        // Asignar el UUID resuelto
+        pet.setUserUid(userUuid);
+        
+        // Guardar en base de datos
         Pet guardada = petRepository.save(pet);
         return petMapper.toResponseDTO(guardada);
     }
 
-    @Transactional(readOnly = true)
-    public List<PetResponseDTO> obtenerTodas() {
-        return petRepository.findAll().stream()
-                .map(petMapper::toResponseDTO)
-                .collect(Collectors.toList());
+  @Transactional(readOnly = true)
+  public List<PetResponseDTO> obtenerTodas(boolean recientes) {
+    List<Pet> mascotas;
+
+    if (recientes) {
+        // Trae la página 0, con un límite de 9 registros, ordenados por ID de forma descendente (las más nuevas primero)
+        Pageable topNueve = PageRequest.of(0, 9, Sort.by("id").descending());
+        mascotas = petRepository.findAll(topNueve).getContent();
+    } else {
+        // Comportamiento original para la pantalla de explorar con filtros
+        mascotas = petRepository.findAll();
     }
+
+    // Tu mismo mapeo de siempre, impecable
+    return mascotas.stream()
+            .map(petMapper::toResponseDTO)
+            .collect(Collectors.toList());
+}
 
     @Transactional(readOnly = true)
     public PetResponseDTO obtenerPorId(UUID id) {
@@ -42,8 +68,9 @@ public class PetService {
     }
 
     @Transactional(readOnly = true)
-    public List<PetResponseDTO> obtenerPorUsuario(String userUid) {
-        return petRepository.findByUserUid(userUid).stream()
+    public List<PetResponseDTO> obtenerPorUsuario(String firebaseUid) {
+    UUID userId = userClient.getUuidByFirebaseUid(firebaseUid);
+    return petRepository.findByUserUid(userId).stream()
                 .map(petMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
